@@ -1,0 +1,32 @@
+A primeira análise importante refere-se ao resultado final. Para isso, foi necessário adaptar os programas para imprimir os valores intermediários de SSE. O gráfico \ref{fig: sse} ilustra essa convergência. Para os três conjuntos de dados de entrada, o SSE paralelizado com quatro threads sobrepõe-se ao resultado sequencial, indicando fortemente que os resultados parciais são equivalentes.
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.9\textwidth]{../Resultados/Graficos/sse_por_iteracao_geral.png}
+\caption{Convergência do SSE}
+\label{fig: sse}
+\end{figure}
+
+O gráfico \ref{fig: speedup} mostra como o aumento da carga de trabalho impacta o \textit{speedup} das execuções.
+
+\par Um primeiro aspecto a ser destacado é que, mesmo utilizando apenas uma thread, o \textit{speedup} é maior em todos os casos. Isso demonstra que as modificações realizadas no programa, mesmo sem paralelização, já provocaram uma redução significativa no tempo de execução.
+
+\par Para uma carga de trabalho de 100.000 entradas, percebeu-se que o aumento do número de threads resulta em uma diminuição da eficiência do código. A principal explicação para essa queda é o \textit{overhead} gerado pelo gerenciamento do paralelismo. À medida que a carga de trabalho aumenta, a proporção do \textit{overhead} em relação ao tempo total diminui. Por exemplo, para uma entrada de 10.000.000 de números, o \textit{speedup} chega a aproximadamente 3,5 vezes.
+
+\par A linha pontilhada no gráfico representa o \textit{speedup} ideal. Como a máquina utilizada possui 12 threads, o limite máximo esperado seria 12 vezes. No entanto, devido ao \textit{overhead} gerado, o \textit{speedup} permanece abaixo desse valor. Observou-se que o \textit{speedup} continuou aumentando até 20 threads, o que indica que uma investigação mais detalhada do hardware é necessária para compreender esse comportamento.
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.9\textwidth]{../Resultados/Graficos/speedup_vs_threads_geral.png}
+\caption{\textit{Speedup} em função do número de threads}
+\label{fig: speedup}
+\end{figure}
+
+Os resultados apresentados no gráfico \ref{fig: tempo_exec} corroboram as observações anteriores. Para as entradas de 100.000 e 1.000.000 números, os ganhos de tempo com o aumento do número de threads foram pouco significativos. No entanto, para a entrada de 10.000.000 números, observou-se uma melhora expressiva no tempo de execução, que caiu de aproximadamente 1.500 ms para menos de 500 ms com um grande número de threads.
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.9\textwidth]{../Resultados/Graficos/tempo_vs_threads_geral.png}
+\caption{Tempo de execução em função do número de threads}
+\label{fig: tempo_exec}
+\end{figure}

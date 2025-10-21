@@ -1,0 +1,5 @@
+\par A primeira alteração ocorreu na função responsável pelo cálculo do tempo de execução. Em vez da função \texttt{clock()}, que mede o tempo total somado de todas as threads, foi utilizada a função \texttt{omp\_get\_wtime()}, da biblioteca \texttt{time.h}, a qual calcula apenas o tempo decorrido (tempo de parede) da execução.
+
+\par Para paralelizar a função \texttt{assignment\_step\_1d}, foi inserida a diretiva \texttt{\#pragma omp parallel for}, em conjunto com a cláusula \texttt{reduction(sse)}, para realizar a soma dos valores parciais de forma paralela.
+
+\par Já a função \texttt{update\_step\_1d} precisou ser reescrita para evitar condições de corrida. Ao invés de utilizar um único par de arrays \texttt{sum} e \texttt{cnt}, foram introduzidos arrays locais \texttt{sum\_thread} e \texttt{cnt\_thread}. Cada thread trabalha com seus próprios acumuladores \texttt{my\_sum} e \texttt{my\_cnt}, que passam por uma etapa final de redução, na qual os resultados parciais são somados para calcular os centróides.

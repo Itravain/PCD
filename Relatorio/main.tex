@@ -1,0 +1,108 @@
+% Joahannes B. D. da Costa
+% 23/12/2022
+\documentclass[12pt]{article}
+\usepackage{sbc-template}
+\usepackage{graphicx,url}
+
+\usepackage[brazil]{babel}   
+\usepackage[utf8]{inputenc}
+% \usepackage[T1]{fontenc}
+\usepackage[portuguese,ruled,vlined,linesnumbered]{algorithm2e}
+
+\usepackage{paralist}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,	% false: boxed links; true: colored links
+    linkcolor=black,	% color of internal links
+    citecolor=black,	% color of links to bibliography
+    filecolor=black,	% color of file links	
+    urlcolor=black		% color of external links
+}
+
+% estilo de algoritmos
+% \SetKwComment{Comment}{$\triangleright$ }{}
+\SetEndCharOfAlgoLine{} % sem ponto e virgula
+\newcommand\mycom[1]{\scriptsize\ttfamily{#1}}
+\SetKwComment{tcp}{$\triangleright$ }{}
+\SetCommentSty{mycom}
+
+\usepackage{amssymb,amsfonts,amsmath}
+\usepackage[tight,footnotesize]{subfigure}
+
+% simbolo de vazio
+\let\oldemptyset\emptyset
+\let\emptyset\varnothing
+
+% comenatarios
+\usepackage{color}
+\newcommand{\blue}[1]{\textcolor{blue}{#1}} % proposed
+\newcommand{\red}[1]{\textcolor{red}{#1}} % to be removed
+\newcommand{\green}[1]{\textcolor{green}{#1}} % to be discussed?
+\newcommand{\yellow}[1]{\textcolor{yellow}{#1}} % ????
+\newcommand{\magenta}[1]{\textcolor{magenta}{#1}} % warning - requires
+\newcommand{\eg}{\textit{e.g.}}
+\newcommand{\ie}{\textit{i.e.}}
+\newcommand{\dlr}[1]{\textcolor{red}{#1}} % to be
+
+\newcommand{\sigla}{NCA}
+\newcommand{\nomeTodo}{\textbf{N}ome \textbf{C}ompleto do \textbf{A}lgoritmo}
+
+% mais espaço =D
+% \linespread{0.9}
+
+\usepackage{lipsum}
+
+\sloppy
+
+\title{Relatório Parcial 1 - OpenMP}
+
+\author{
+    Ícaro Travain Darwich da Rocha\inst{1},
+    Heitor G. B. Reis\inst{1},
+    João Victor Gama Dantas\inst{1}
+}
+
+\address{Instituto de Ciência e Tecnologia (UNIFESP), São José dos Campos, Brasil
+  \vspace{-0.2cm}
+  % se não tiver colaborador de outra universidade, comentar trecho abaixo
+  % [inicio - colaborador] 
+  % \vspace{-0.2cm}
+  % [final - colaborador]
+  \email{\{icaro.travain, h.reis, dantas.joao\}@unifesp.br}
+}
+
+\begin{document} 
+\pagestyle{myheadings} % numerar páginas
+\maketitle
+
+\begin{resumo} 
+Este trabalho avalia a paralelização de um algoritmo sequencial utilizando OpenMP para melhorar o desempenho em grandes conjuntos de dados. Foram paralelizadas funções críticas e medidas as execuções com diferentes entradas e números de threads. Os resultados mostram que, para dados pequenos, o \textit{speedup} é desprezível devido ao \textit{overhead}, enquanto para grandes entradas o tempo de execução foi reduzido significativamente. A análise dos valores intermediários de SSE confirma que os resultados paralelos e sequenciais são equivalentes, garantindo a correção da paralelização.
+\end{resumo}
+
+%------------------------------
+\section{Introdução}
+\label{sec:ambiente}
+\input{texto/1_secao}
+%------------------------------
+\section{Metodologia}
+\label{sec:graficos}
+\input{texto/2_secao}
+%------------------------------
+\section{Desenvolvimento}
+\label{sec:validacao}
+\input{texto/3_secao}
+%------------------------------
+\section{Resultados e Discussão}
+\label{sec:resultados}
+\input{texto/4_secao}
+%------------------------------
+\section{Conclusão}
+\label{sec:conclusao}
+\input{texto/5_secao}
+%------------------------------
+
+\bibliographystyle{sbc}
+\bibliography{referencias}
+
+\end{document}

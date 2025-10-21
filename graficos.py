@@ -56,7 +56,10 @@ def plot_tempo_vs_threads(df_omp, out_dir=OUT_DIR):
         print("Sem coluna 'Threads' em resultados.csv. Pulando gráfico Tempo vs Threads.")
         return
     
-    for N in sorted(df_omp['Tamanho'].unique()):
+    plt.figure(figsize=(10, 6))
+    colors = plt.cm.viridis(np.linspace(0, 1, len(df_omp['Tamanho'].unique())))
+
+    for i, N in enumerate(sorted(df_omp['Tamanho'].unique())):
         g = df_omp[df_omp['Tamanho'] == N].copy()
         
         # Calcula média e desvio padrão por número de threads
@@ -73,30 +76,22 @@ def plot_tempo_vs_threads(df_omp, out_dir=OUT_DIR):
         y_mean = agg['Tempo_mean'].values
         y_std = agg['Tempo_std'].values
 
-        plt.figure(figsize=(8, 5))
         plt.errorbar(x, y_mean, 
                      yerr=y_std, 
-                     marker='o', capsize=5, capthick=2,
-                     label='Tempo médio ± σ')
+                     marker='o', capsize=5, capthick=1.5,
+                     label=f'N={N:,}',
+                     color=colors[i])
 
-        # Linha ideal que satura em 12 threads: T_ideal = T1 / min(T, 12)
-        if 1 in agg['Threads'].values:
-            t1 = float(agg.loc[agg['Threads'] == 1, 'Tempo_mean'])
-            ideal = t1 / np.minimum(x, 12)
-            plt.plot(x, ideal, '--', color='gray', alpha=0.7, label='Ideal (satura em 12)')
-        else:
-            print(f"Aviso: não há medição com 1 thread para N={N:,}; linha ideal omitida.")
-
-        plt.title(f"Tempo total vs Threads (N={N:,})")
-        plt.xlabel("Threads")
-        plt.ylabel("Tempo (ms)")
-        plt.grid(True, alpha=0.3)
-        plt.legend()
-        out_path = os.path.join(out_dir, f"tempo_vs_threads_N{N}.png")
-        plt.tight_layout()
-        plt.savefig(out_path, dpi=150)
-        plt.close()
-        print(f"✓ Salvo: {out_path}")
+    plt.title("Tempo de Execução vs Threads para Diferentes Entradas")
+    plt.xlabel("Threads")
+    plt.ylabel("Tempo (ms)")
+    plt.grid(True, alpha=0.3)
+    plt.legend(title="Tamanho (N)")
+    out_path = os.path.join(out_dir, "tempo_vs_threads_geral.png")
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=150)
+    plt.close()
+    print(f"✓ Salvo: {out_path}")
 
 def plot_speedup_vs_threads(df_omp, df_seq, out_dir=OUT_DIR):
     ensure_dir(out_dir)
@@ -113,7 +108,12 @@ def plot_speedup_vs_threads(df_omp, df_seq, out_dir=OUT_DIR):
     else:
         df_merged = df_omp.copy()
 
-    for N in sorted(df_merged['Tamanho'].unique()):
+    plt.figure(figsize=(10, 6))
+    
+    # Cores para as diferentes linhas
+    colors = plt.cm.viridis(np.linspace(0, 1, len(df_merged['Tamanho'].unique())))
+
+    for i, N in enumerate(sorted(df_merged['Tamanho'].unique())):
         g = df_merged[df_merged['Tamanho'] == N].copy()
         
         # Calcula média e desvio padrão do speedup
@@ -130,26 +130,27 @@ def plot_speedup_vs_threads(df_omp, df_seq, out_dir=OUT_DIR):
         y_mean = agg['Speedup_mean'].values
         y_std = agg['Speedup_std'].values
 
-        plt.figure(figsize=(8, 5))
         plt.errorbar(x, y_mean, 
                      yerr=y_std,
-                     marker='o', capsize=5, capthick=2,
-                     label='Speedup médio ± σ')
-        
-        # Linha ideal que satura em 12 threads: S_ideal = min(T, 12)
-        ideal = np.minimum(x, 12)
-        plt.plot(x, ideal, '--', color='gray', alpha=0.7, label='Ideal (satura em 12)')
-        
-        plt.title(f"Speedup vs Threads (N={N:,})")
-        plt.xlabel("Threads")
-        plt.ylabel("Speedup")
-        plt.grid(True, alpha=0.3)
-        plt.legend()
-        out_path = os.path.join(out_dir, f"speedup_vs_threads_N{N}.png")
-        plt.tight_layout()
-        plt.savefig(out_path, dpi=150)
-        plt.close()
-        print(f"✓ Salvo: {out_path}")
+                     marker='o', capsize=5, capthick=1.5,
+                     label=f'N={N:,}',
+                     color=colors[i])
+    
+    # Linha ideal (plotada uma vez)
+    all_threads = sorted(df_merged['Threads'].unique())
+    ideal = np.minimum(all_threads, 12)
+    plt.plot(all_threads, ideal, '--', color='gray', alpha=0.8, label='Ideal (satura em 12)')
+    
+    plt.title("Speedup vs Threads para Diferentes Tamanhos de Entrada")
+    plt.xlabel("Threads")
+    plt.ylabel("Speedup")
+    plt.grid(True, alpha=0.3)
+    plt.legend(title="Tamanho (N)")
+    out_path = os.path.join(out_dir, "speedup_vs_threads_geral.png")
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=150)
+    plt.close()
+    print(f"✓ Salvo: {out_path}")
 
 def _read_sse_series(path):
     if not os.path.exists(path):
@@ -169,14 +170,19 @@ def _read_sse_series(path):
 
 def plot_sse_validacao(labels=('pequeno','medio','grande'), threads_ref=4, out_dir=OUT_DIR):
     """
-    Plota SSE por iteração comparando serial vs OpenMP.
+    Plota SSE por iteração comparando serial vs OpenMP para todos os labels em um único gráfico.
     Usa a última repetição disponível de cada configuração.
     """
     ensure_dir(out_dir)
     serial_dir = "Resultados/Original"
     omp_dir = "Resultados/OpenMP"
 
+    plt.figure(figsize=(12, 7))
     any_plotted = False
+    
+    # Paleta de cores para distinguir os labels
+    colors = {'pequeno': ('#E15759', '#F28E2B'), 'medio': ('#4E79A7', '#59A14F'), 'grande': ('#76B7B2', '#B07AA1')}
+    
     for lbl in labels:
         # Busca última repetição do serial (sse_<label>_r*.csv)
         serial_pattern = os.path.join(serial_dir, f"sse_{lbl}_r*.csv")
@@ -201,57 +207,41 @@ def plot_sse_validacao(labels=('pequeno','medio','grande'), threads_ref=4, out_d
             print(f"Falha ao ler SSE para '{lbl}'. Pulando.")
             continue
 
-        plt.figure(figsize=(10, 6))
+        any_plotted = True
         
         if sse_serial is not None:
             it_serial = np.arange(1, len(sse_serial)+1)
-            # Marca a cada 5 pontos para não poluir
-            markevery = max(1, len(sse_serial) // 20)
             plt.plot(it_serial, sse_serial, 
-                    label='Serial (naive)', 
-                    marker='o', markevery=markevery, 
-                    ms=6, lw=2.5, 
-                    color='#E15759', 
-                    linestyle='-',
-                    alpha=0.85)
+                    label=f'Serial ({lbl})', 
+                    marker='.', markersize=4,
+                    linestyle='-', lw=2,
+                    color=colors.get(lbl, ('black', 'gray'))[0],
+                    alpha=0.9)
         
         if sse_omp is not None:
             it_omp = np.arange(1, len(sse_omp)+1)
-            markevery = max(1, len(sse_omp) // 20)
             plt.plot(it_omp, sse_omp, 
-                    label=f'OpenMP ({threads_ref} threads)', 
-                    marker='s', markevery=markevery,
-                    ms=6, lw=2.5, 
-                    color='#4E79A7',
-                    linestyle='--',
-                    alpha=0.85)
-        
-        plt.title(f"Convergência SSE – {lbl}", fontsize=14, fontweight='bold')
+                    label=f'OpenMP ({lbl}, {threads_ref}t)', 
+                    marker='.', markersize=4,
+                    linestyle='--', lw=2,
+                    color=colors.get(lbl, ('black', 'gray'))[1],
+                    alpha=0.9)
+    
+    if any_plotted:
+        plt.title("Convergência do SSE (Serial vs OpenMP)", fontsize=14, fontweight='bold')
         plt.xlabel("Iteração", fontsize=12)
         plt.ylabel("SSE (escala log)", fontsize=12)
         plt.grid(True, alpha=0.3, linestyle=':', linewidth=0.7)
-        plt.legend(loc='best', framealpha=0.95, fontsize=11)
+        plt.legend(loc='best', framealpha=0.95, fontsize=10)
         plt.yscale('log')
         
-        # Adiciona anotação da diferença percentual no SSE final
-        if sse_serial is not None and sse_omp is not None:
-            final_serial = sse_serial[-1]
-            final_omp = sse_omp[-1]
-            diff_pct = 100 * abs(final_serial - final_omp) / final_serial
-            plt.text(0.98, 0.02, f'Diferença SSE final: {diff_pct:.2f}%',
-                    transform=plt.gca().transAxes,
-                    ha='right', va='bottom',
-                    bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5),
-                    fontsize=9)
-        
-        out_path = os.path.join(out_dir, f"sse_por_iteracao_{lbl}.png")
+        out_path = os.path.join(out_dir, "sse_por_iteracao_geral.png")
         plt.tight_layout()
         plt.savefig(out_path, dpi=150)
         plt.close()
-        any_plotted = True
         print(f"✓ Salvo: {out_path}")
-
-    if not any_plotted:
+    else:
+        plt.close() # Fecha a figura se nada foi plotado
         print("Nenhum gráfico de SSE por iteração gerado (arquivos não encontrados).")
 
 def _first_existing(paths):

@@ -1,0 +1,24 @@
+O trabalho foi executado em uma máquina com as seguintes configurações:
+\begin{itemize}
+\item Processador: Intel® Core™ i5-1235U
+\item Número de núcleos: 10
+\item Total de threads: 12
+\item Frequência do processador: 3.3 GHz
+\item Cache: 12 MB
+\item Memória RAM: 32 GB DDR4 3200 MHz
+\end{itemize}
+
+\par Os testes foram realizados utilizando o programa em Python \textit{gerador\_gray\_16.py}. Nele, é possível escolher o número total de pontos gerados, o número de centróides e as faixas que servirão como base para a geração dos dados.
+
+\par Para automatizar a execução do programa, foi desenvolvido um script que realiza as seguintes etapas:
+\begin{enumerate}
+\item Compila os arquivos em C do código sequencial;
+\item Executa o código 10 vezes para três entradas diferentes: 100.000 números, 1.000.000 números e 10.000.000 números;
+\item Compila o código paralelizado com OpenMP;
+\item Executa o código cinco vezes para cada uma das entradas (pequena, média e grande) utilizando uma thread;
+\item Repete o processo para os seguintes números de threads: 1, 2, 4, 6, 8, 10, 12, 16, 18, 20, 28, 36 e 44;
+\item Salva os dados no arquivo \textit{resultados.csv};
+\item Executa o código em Python \textit{graficos.py}, o qual adiciona os \textit{speedups} aos resultados e gera os gráficos de \textit{speedup}, tempos de execução e valores intermediários de SSE.
+\end{enumerate}
+
+\par Cabe ressaltar que os programas foram modificados para salvar os valores intermediários de SSE nas versões sequencial e paralelizada com quatro threads.
